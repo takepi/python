@@ -1,0 +1,24 @@
+Kinect for Windows Runtime v1.8
+https://www.microsoft.com/en-us/download/confirmation.aspx?id=40277
+
+OpenNI2
+http://structure.io/openni
+
+NITE2
+https://drive.google.com/file/d/0B3e4_6C5_YOjQWtCcVl3VnRsWG8/edit?pref=2&pli=1
+
+primesense package
+https://pypi.python.org/pypi/primesense/
+
+NiViewer is don't work
+
+D:\mechatech>python opennitest.py
+<primesense.openni2.SensorInfo object at 0x029EC9D0>
+Traceback (most recent call last):
+  File "opennitest.py", line 8, in <module>
+    depth_stream.start()
+  File "build\bdist.win32\egg\primesense\openni2.py", line 416, in start
+  File "build\bdist.win32\egg\primesense\_openni2.py", line 2102, in wrapper
+primesense.utils.OpenNIError: (OniStatus.ONI_STATUS_ERROR, '', None)
+
+abybyabyabyabya

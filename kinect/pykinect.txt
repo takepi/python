@@ -1,0 +1,24 @@
+Kinect for Windows Runtime v1.8
+https://www.microsoft.com/en-us/download/confirmation.aspx?id=40277
+
+ez_setup.py
+
+easy_install
+
+pip
+
+pip install pykinect
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "c:\python27\lib\site-packages\pykinect\nui\__init__.py", line 116, in __init__
+    raise KinectError('Unable to create Kinect runtime '+ traceback.format_exc())
+pykinect.nui.KinectError: Unable to create Kinect runtime Traceback (most recent call last):
+  File "c:\python27\lib\site-packages\pykinect\nui\__init__.py", line 111, in __init__
+    self._nui.NuiInitialize(nui_init_flags)
+  File "c:\python27\lib\site-packages\pykinect\nui\_interop.py", line 167, in NuiInitialize
+    _NuiInstance._NuiInitialize(self, dwFlags)
+  File "_ctypes/callproc.c", line 945, in GetResult
+WindowsError: [Error -2097086456] Windows Error 0x83010008
+
+abyabyabyabya
