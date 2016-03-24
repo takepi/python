@@ -12,6 +12,7 @@ class Aaa(Process):
 		print "process start"
 		for i in range(5):
 			print self.aa, i
+		print "process end"
 
 def main():
 
