@@ -9,6 +9,7 @@ class Aaa(Process):
 		self.daemon = False
 
 	def run(self):
+		print "process start"
 		for i in range(5):
 			print self.aa, i
 
