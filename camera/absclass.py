@@ -2,10 +2,11 @@ import RPi.GPIO as gpio
 
 class AbsEncoder:
 	def __init__(self):
+		gpio.setmode(gpio.BOARD)
 		self.pins = (29,31,33,35,37,40,38,36)
 		for pin in self.pins:
 			gpio.setup(pin, gpio.IN, pull_up_down = gpio.PUD_UP)
-		self.offset = 41
+		self.offset = 0
 		
 	def GetCount(self):
 		grayData = 0
@@ -23,11 +24,13 @@ class AbsEncoder:
 	def GetAngle(self):
 		count = self.GetCount()
 		return int(360 * float(count - self.offset) / 255) * -1
-		
-	def GetDeg(self):
-		count = self.GetCount()
-		deg = int(360 * float(count - self.offset) / 255) * -1 + 7
-		return deg
 
+	def GetData(self):
+		count = self.GetCount()
+		data = int(count - self.offset)
+		if data < 0:
+			data = data + 256
+		return data
+		
 	def SetOffset(self):
 		self.offset = self.GetCount()

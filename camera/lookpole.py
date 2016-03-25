@@ -56,7 +56,7 @@ def mouse(event, x, y, flag, frame):
 color = 0
 
 def main():
-	cap = cv2.VideoCapture(1)
+	cap = cv2.VideoCapture(0)
 	while True:
 		ret, frame = cap.read()
 		img = pole(frame, color)

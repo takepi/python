@@ -11,50 +11,30 @@ import traceback
 import time
 
 cap = cv2.VideoCapture(0)
-gpio.setmode(gpio.BOARD)
 
 def sendData(q):
 	import controller
 	bus = smbus.SMBus(1)
-	gpio.setup(21, gpio.OUT)
-	gpio.setup(23, gpio.OUT)
-	gpio.output(21, False)
-	gpio.output(23, False)
-
 	while True:
-		data = controller.read() << 4
+		cdata = controller.read() << 4
 
 		if q.empty():
-			try:
-				bus.write_byte(0x08, data)
-			except:
-				print "uwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			data = cdata
 		else:
 			if q.get() == "cw":
-				#print "cw"
-				data = 8
+				print "cw"
+				data = cdata | 2
 			elif q.get() == "ccw":
-				#print "ccw"
-				data = 4
+				print "ccw"
+				data = cdata | 1
 			elif q.get() == "fire":
-				gpio.output(21, True)
-				time.sleep(0.5)
-				gpio.output(21, False)
-				time.sleep(0.5)
-				gpio.output(23, True)
-				time.sleep(0.5)
-				gpio.output(23, False)
-				time.sleep(0.5)
-				data = 12
+				data = cdata | 3
 			else:
-				#print "stop"
-				pass
+				print "stop"
+				data = cdata
 		
-		#print bin(data)
-			try:
-				bus.write_byte(0x08, data)
-			except:
-				print "uwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		debug(data = bin(data))
+		bus.write_byte(0x08, cdata)
 
 def debug(q):
 	while True:
@@ -66,7 +46,7 @@ def debug(q):
 					pass
 					print i
 
-def autoFire(abe, pole, q_debug,q_turret, teamcolor, polenum):
+def autoFire(abe, pole, q_debug, teamcolor, polenum):
 	swing = {1:235, 2:0, 3:20}
 	bcolor = None
 	flg = 0
@@ -75,12 +55,7 @@ def autoFire(abe, pole, q_debug,q_turret, teamcolor, polenum):
 
 	while abe.GetData() != swing:
 		q_debug.put([abe.GetData()])
-		if abe.GetData() < swing:
-			q_debug.put(["ccw"])
-			q_turret.put("ccw")
-		elif abe.GetData() > swing:
-			q_debug.put(["ccw"])
-			q_turret.put("ccw")
+		#q_turret.put("cw")
 
 	while True:
 		ret, frame = cap.read()
@@ -96,12 +71,12 @@ def autoFire(abe, pole, q_debug,q_turret, teamcolor, polenum):
 						while abe.GetData() != swing + zure:
 							if zure > 0:
 								q_debug.put(["cw", abe.GetData(), swing + zure])
-								q_turret.put("cw")
+								#q_turret.put("cw")
 							else:
 								q_debug.put(["ccw", abe.GetData(), swing + zure])
-								q_turret.put("ccw")
+								#q_turret.put("ccw")
 						q_debug.put(["turret ok"])
-						q_turret.put("fire")
+						#q_turret.put("fire")
 						time.sleep(5)
 						break
 					else:
@@ -116,6 +91,7 @@ def autoFire(abe, pole, q_debug,q_turret, teamcolor, polenum):
 			nflg = nflg + 1
 
 def main():
+	gpio.setmode(gpio.BOARD)
 	gpio.setup(19, gpio.IN, pull_up_down = gpio.PUD_UP)
 
 	inifile = ConfigParser.SafeConfigParser()
@@ -123,7 +99,6 @@ def main():
 	teamcolor = str(inifile.get("team", "color"))
 
 	abe = absclass.AbsEncoder()
-	abe.SetOffset()
 
 	pole = poleclass.Pole("polecolor.ini")
 	q_turret = Queue(maxsize = 1)
@@ -134,20 +109,15 @@ def main():
 	p_send.daemon = True
 	p_debug.daemon = True
 	p_debug.start()
-	p_send.start()
+	#p_send.start()
 
-	while True:
-		while gpio.input(19):
-			pass
-			#q_debug.put(["not auto"])
+	while gpio.input(19):
+		q_debug.put(["not auto"])
 
-		for i in range(2):
-			for i in range(3, 0, -1):
-				autoFire(abe, pole, q_debug, q_turret, teamcolor, i)
-				time.sleep(5)
-
-		while not gpio.input(19):
-			q_debug.put(["back please"])
+	abe.SetOffset()
+	for i in range(3, 0, -1):
+		autoFire(abe, pole, q_debug, teamcolor, i)
+		time.sleep(5)
 
 if __name__ == "__main__":
 	try:
@@ -160,3 +130,4 @@ if __name__ == "__main__":
 		cap.release()
 		cv2.destroyAllWindows()
 		gpio.cleanup()
+		print "End"

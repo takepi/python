@@ -8,10 +8,12 @@ class Pole:
 
 		inifile = ConfigParser.SafeConfigParser()
 		inifile.read(ini)
+		self.rscope = int(inifile.get("Red", "scope"))
 		self.rmax_s = int(inifile.get("Red", "max_s"))
 		self.rmax_v = int(inifile.get("Red", "max_v"))
 		self.rmin_s = int(inifile.get("Red", "min_s"))
 		self.rmin_v = int(inifile.get("Red", "min_v"))
+		self.bscope = int(inifile.get("Blue", "scope"))
 		self.bmax_s = int(inifile.get("Blue", "max_s"))
 		self.bmax_v = int(inifile.get("Blue", "max_v"))
 		self.bmin_s = int(inifile.get("Blue", "min_s"))
@@ -21,11 +23,9 @@ class Pole:
 
 		hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-		h_h = color + 7
-		l_h = color - 7
-
-		if l_h < 0:
-			l_h = 180 + l_h
+		if color < self.bscope:
+			h_h = color + self.rscope
+			l_h = color + 180 - self.rscope
 			h_color = np.array([h_h, self.rmax_s, self.rmax_v])
 			l_color = np.array([l_h, self.rmin_s, self.rmin_v])
 			red_color = [np.array([0, self.rmin_s, self.rmin_v]), np.array([180 ,self.rmax_s, self.rmax_v])]
@@ -36,6 +36,8 @@ class Pole:
 			img_mask = img_mask1 + img_mask2
 
 		else:
+			h_h = color + self.bscope
+			l_h = color - self.bscope
 			h_color = np.array([h_h, self.bmax_s, self.bmax_v])
 			l_color = np.array([l_h, self.bmin_s, self.bmin_v])
 
@@ -102,7 +104,7 @@ class Pole:
 
 	def getPole(self, pole, img):
 
-		sizes = {"c" : [300, 1000], "b" : [100, 300], "a" : [30, 100]}
+		sizes = {"c" : [250, 1000], "b" : [80, 250], "a" : [10, 80]}
 
 		if pole == "c":
 			img_close = img
@@ -141,6 +143,8 @@ class Pole:
 			b, g, r = img_color[y, x]
 			hcolor = max(b, g, r)
 
+			cpoint = [[x, y]]
+
 			if hcolor == b:
 				pcolor = "blue"
 			elif hcolor == r:
@@ -148,6 +152,7 @@ class Pole:
 
 		else:
 			pcolor = None
+			cpoint = []
 
-		return img_color, point, pcolor, area
+		return img_color, cpoint, pcolor, area
 

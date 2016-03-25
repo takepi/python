@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 
-src = cv2.imread("blue.png")
+src = cv2.imread("pole.jpg")
 
 hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
 gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
@@ -13,8 +13,9 @@ ret, labels, stats, centroids = cv2.connectedComponentsWithStats(th)
 
 areas = []
 for i in range(ret):
-	if int(stats[i][4]) > 300:
-		areas.append(i)
+	if int(stats[i][4]) > 0:
+		if int(stats[i][4]) < 9999:
+			areas.append(i)
 		
 rgbs = []
 for i in range(ret+1):
@@ -40,19 +41,19 @@ for y in xrange(0, labeling.shape[0]):
 		else:
 			labeling[y, x] = [0, 0, 0]
 """
-"""
+
 font = cv2.FONT_HERSHEY_PLAIN
 
 for i in areas:
 	cv2.putText(labeling, str(stats[i][4]), (int(centroids[i][0]), int(centroids[i][1])), font, 1, [255, 255, 255])
-"""
+
 cv2.imshow("labeling", labeling)
-"""
+
 print "ret", ret
 print "stats", stats
 print "centroids", centroids
 print "areas", areas
-"""
+
 sortareas = []
 for i in areas:
 	sortareas.append([int(stats[i][4]), i])
