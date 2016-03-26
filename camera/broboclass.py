@@ -45,7 +45,7 @@ class SendData(Process):
 						
 			if flg == "notauto":
 				data = controller.read() << 4
-				if data = 0xf0:
+				if data == 0xf0:
 					self.aircon()
 					data = 12
 					
@@ -78,7 +78,7 @@ class LimTurret(Process):
 		Process.__init__(self)
 		self.daemon = True
 		
-	def run:
+	def run(self):
 		while True:
 			if 50 < abe.GetData() < 205:
 				q_turret.put("brake")
@@ -90,7 +90,7 @@ class Debug(Process):
 		Process.__init__(self)
 		self.daemon = True
 		
-	def run:
+	def run(self):
 		while True:
 			if q.qsize() != 0:
 				for i in q.get():
@@ -101,7 +101,7 @@ class Debug(Process):
 						
 class Auto:
 	def __init__(self, abe, pole, q_debug, q_turret, tcolor):
-		swing = {1, 235, 2:0, 3:20}
+		swing = {1:235, 2:0, 3:20}
 		
 	def fire(self, polenum):
 		flg = 0
@@ -116,10 +116,10 @@ class Auto:
 		while abe.GetData() != swing:
 			q_debug.put([abe.GetData()])
 			if abe.GetData() < swing:
-				q_debug.put([turret[0])
+				q_debug.put([turret[0]])
 				q_turret.put(turret[0])
 			elif abe.GetData() > swing:
-				q_debug.put([turret[1])
+				q_debug.put([turret[1]])
 				q_turret.put(turret[1])
 				
 		q_turret.put("brake")
