@@ -73,7 +73,7 @@ class SendData(Process):
 				
 			bdata = data
 			
-class Limturret(Process):
+class LimTurret(Process):
 	def __init__(self, abe, q_turret, q_debug):
 		Process.__init__(self)
 		self.daemon = True
@@ -100,11 +100,107 @@ class Debug(Process):
 						print i
 						
 class Auto:
-	def __init__(self, abe, pole, q_debug, q_turret, tcolor, polenum):
+	def __init__(self, abe, pole, q_debug, q_turret, tcolor):
 		swing = {1, 235, 2:0, 3:20}
-		swing = swing[polenum]
+		
+	def fire(self, polenum):
 		flg = 0
 		nflg = 0
-		q_turret.put("auto")
+		swing = swing[polenum]
 		
-	def 
+		if swing >= 128:
+			turret = ["ccw", "cw"]
+		else:
+			turret = ["cw", "ccw"]
+			
+		while abe.GetData() != swing:
+			q_debug.put([abe.GetData()])
+			if abe.GetData() < swing:
+				q_debug.put([turret[0])
+				q_turret.put(turret[0])
+			elif abe.GetData() > swing:
+				q_debug.put([turret[1])
+				q_turret.put(turret[1])
+				
+		q_turret.put("brake")
+		
+		while True:
+			ret, frame = cap.read()
+			img, point, color, area = pole.getPole("a", frame)
+
+			if color != None:
+				q_debug.put(["color good", flg, color])
+				if bcolor == color:
+					flg = flg + 1
+					if flg > 20:
+						if teamcolor == bcolor:
+							zure = (point[0][0] - img.shape[1]/2 - 20)/16
+							while abe.GetData() != swing + zure:
+								if abe.GetData() - (swing + zure) < 0:
+									q_debug.put(["cw", abe.GetData(), swing + zure])
+									q_turret.put("cw")
+								else:
+									q_debug.put(["ccw", abe.GetData(), swing + zure])
+									q_turret.put("ccw")
+							q_turret.put("brake")
+							q_debug.put(["turret ok"])
+							q_turret.put("fire")
+							break
+						else:
+							q_turret.put("brake")
+							q_debug.put(["turret no"])
+							break
+				else:
+					bcolor = color
+			else:
+				if nflg > 50:
+					break
+				q_debug.put(["None", nflg])
+				nflg = nflg + 1
+				
+def main():
+	inifile = ConfigParser.SafeConfigParser()
+	inifile.read("polecolor.ini")
+	teamcolor = str(inifile.get("team", "color"))
+
+	abe = absclass.AbsEncoder()
+	abe.SetOffset()
+
+	pole = poleclass.Pole("polecolor.ini")
+	q_turret = Queue(maxsize = 1)
+	q_debug = Queue(maxsize = 5)
+	
+	p_send = SendData(q_turret)
+	p_limturret = LimTurret(abe, q_turret, q_debug)
+	p_debug = Debug(q_debug)
+	auto = Auto(abe, pole, q_debug, q_turret, teamcolor)
+	
+	p_send.start()
+	p_limturret.start()
+	p_debug.start()
+	
+	while True:
+		while gpio.input(19):
+			pass
+			
+		q_turret.put("auto")
+		for i in [3, 2, 1, 3, 2, 1]:
+			auto.fire(i)
+			time.sleep(5)
+		
+		q_turret.put("notauto")
+		
+		while not gpio.input(19):
+			q_debug.put(["back please"])
+			
+if __name__ == "__main__":
+	try:
+		main()
+	except:
+		print "!-----------error------------!"
+		print traceback.format_exc(sys.exc_info()[2])
+		print "!----------------------------!"
+	finally:
+		cap.release()
+		cv2.destroyAllWindows()
+		gpio.cleanup()
