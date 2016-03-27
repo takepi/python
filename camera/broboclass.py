@@ -108,19 +108,22 @@ class Auto:
 		nflg = 0
 		swing = swing[polenum]
 		
-		if swing >= 128:
-			turret = ["ccw", "cw"]
-		else:
+		if swing <= 128:
 			turret = ["cw", "ccw"]
-			
-		while abe.GetData() != swing:
-			q_debug.put([abe.GetData()])
-			if abe.GetData() < swing:
-				q_debug.put([turret[0]])
-				q_turret.put(turret[0])
-			elif abe.GetData() > swing:
-				q_debug.put([turret[1]])
-				q_turret.put(turret[1])
+		else:
+			turret = ["ccw", "cw"]
+		
+		while True:
+			if 0 <= abe.GetData() < 128:
+				if abe.GetData() < swing:
+					q_turret.put(turret[0])
+				elif abe.GetData() > swing:
+					q_turret.put(turret[1])
+			elif 128 <= abe.GetData() < 256:
+				if abe.GetData() < swing:
+					q_turret.put(turret[1])
+				elif abe.GetData() > swing:
+					q_turret.put(turret[0])
 				
 		q_turret.put("brake")
 		
