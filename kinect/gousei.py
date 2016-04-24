@@ -6,7 +6,7 @@ hana = cv2.imread("hana.jpg")
 width, height = d.shape[:2]
 
 dd = d[:, :, :3]
-dd = cv2.cvtColor(dd, cv2.cv.CV_GRAY2BGR)
+#dd = cv2.cvtColor(dd, cv2.CV_GRAY2BGR)
 dd = d / 255.0
 
 d = d[:, :, :3]
